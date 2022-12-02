@@ -5,7 +5,7 @@ const YEAR: &str = "_template";
 
 #[cfg(debug_assertions)]
 #[global_allocator]
-static ALLOCATOR: dhat::DhatAlloc = dhat::DhatAlloc;
+static ALLOCATOR: dhat::Alloc = dhat::Alloc;
 
 macro_rules! day {
     ( $d:expr ) => {
@@ -29,7 +29,7 @@ macro_rules! day {
 
 fn main() {
     #[cfg(debug_assertions)]
-    let _dhat = dhat::Dhat::start_heap_profiling();
+    let _dhat = dhat::Profiler::new_heap();
 
     println!("AOC {}", YEAR);
 }

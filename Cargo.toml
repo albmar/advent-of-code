@@ -5,9 +5,9 @@ edition = "2021"
 
 [dependencies]
 paste = "1"
-criterion = "0.3"
-dhat = "0.2"
-ahash = "0.7"
+criterion = "0.4"
+dhat = "0.3"
+ahash = "0.8"
 
 [dependencies.lexical-core]
 version = "0.8"
