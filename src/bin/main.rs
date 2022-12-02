@@ -32,6 +32,7 @@ fn main() {
     let _dhat = dhat::Profiler::new_heap();
 
     println!("AOC {}", YEAR);
+    day!(1);
 }
 
 fn solve<O, O2, S: for<'a> Solver<'a, Output = O, Output2 = O2>>(
