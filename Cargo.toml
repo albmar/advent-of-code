@@ -1,5 +1,5 @@
 [package]
-name = "aoc_template"
+name = "advent-of-code"
 version = "0.0.0"
 edition = "2021"
 
