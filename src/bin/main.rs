@@ -1,7 +1,7 @@
 use advent_of_code::{days::*, solver::Solver};
 use std::{fmt::Debug, time::Instant};
 
-const YEAR: &str = "_template";
+const YEAR: &str = "2022";
 
 #[cfg(debug_assertions)]
 #[global_allocator]
