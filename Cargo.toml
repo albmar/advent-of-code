@@ -1,0 +1,20 @@
+[package]
+name = "aoc_template"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+paste = "1"
+criterion = "0.3"
+dhat = "0.2"
+ahash = "0.7"
+
+[dependencies.lexical-core]
+version = "0.8"
+default-features = false
+features = ["parse-integers"]
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = 'abort'
