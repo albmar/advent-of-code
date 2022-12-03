@@ -34,7 +34,18 @@ impl<'a> Solver<'a> for Day3 {
     }
 
     fn part2(data: Self::Parsed) -> Self::Output {
-        todo!()
+        data.into_iter()
+            .array_chunks::<3>()
+            .map(|group| {
+                group[0]
+                    .chars()
+                    .filter(|&c| group[1].contains(c))
+                    .filter(|&c| group[2].contains(c))
+                    .map(get_priority)
+                    .nth(0)
+                    .unwrap()
+            })
+            .sum()
     }
 }
 
@@ -67,6 +78,16 @@ CrZsJsPPZsGzwwsLwLmpwMDw"
 
     #[test]
     fn d3p2() {
-        assert_eq!(Day3::part2(Day3::parse("")), 0);
+        assert_eq!(
+            Day3::part2(Day3::parse(
+                "vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw"
+            )),
+            70
+        );
     }
 }
