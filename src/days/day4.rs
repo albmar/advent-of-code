@@ -30,7 +30,14 @@ impl<'a> Solver<'a> for Day4 {
     }
 
     fn part2(data: Self::Parsed) -> Self::Output {
-        todo!()
+        data.array_chunks::<2>()
+            .filter(|[a, b]| {
+                a.contains(b.start())
+                    || a.contains(b.end())
+                    || b.contains(a.start())
+                    || b.contains(a.end())
+            })
+            .count() as u32
     }
 }
 
@@ -64,7 +71,7 @@ mod tests {
 6-6,4-6
 2-6,4-8"
             )),
-            0
+            4
         );
     }
 }
