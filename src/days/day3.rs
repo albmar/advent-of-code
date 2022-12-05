@@ -16,7 +16,7 @@ impl<'a> Solver<'a> for Day3 {
     type Output = u32;
 
     fn parse(input: &'a str) -> Self::Parsed {
-        input.split("\n").collect()
+        input.trim().split("\n").collect()
     }
 
     fn part1(data: Self::Parsed) -> Self::Output {

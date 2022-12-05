@@ -36,7 +36,7 @@ fn main() {
     day!(2, 11063, 10349);
     day!(3, 7831, 2683);
     day!(4, 542, 900);
-    day!(5);
+    day!(5, "QGTHFZBHV".to_string());
 }
 
 fn solve<O, O2, S: for<'a> Solver<'a, Output = O, Output2 = O2>>(
@@ -45,7 +45,7 @@ fn solve<O, O2, S: for<'a> Solver<'a, Output = O, Output2 = O2>>(
     part2_output: Option<O2>,
 ) {
     let input = std::fs::read_to_string(format!("input/{}/day{}.txt", YEAR, day_number)).unwrap();
-    let trimmed = input.trim();
+    let trimmed = input.as_str();
 
     let mut args = std::env::args();
     if args.len() > 1 {
