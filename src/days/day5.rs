@@ -43,6 +43,14 @@ impl Move {
         let drain = from.drain(i..).rev().collect::<Vec<_>>();
         port.stacks[self.to as usize].extend(drain);
     }
+
+    fn execute_9001(&self, port: &mut Port) {
+        let from = &mut port.stacks[self.from as usize];
+        assert!(from.len() >= self.count as usize);
+        let i = from.len() - self.count as usize;
+        let drain = from.drain(i..).collect::<Vec<_>>();
+        port.stacks[self.to as usize].extend(drain);
+    }
 }
 
 impl Display for Move {
@@ -77,25 +85,17 @@ impl<'a> Solver<'a> for Day5 {
             })
             .collect::<Vec<_>>();
         let stack_count = stacks.last().unwrap().unwrap().mark.to_digit(10).unwrap() as usize;
-        dbg!(stack_count);
-        dbg!(stacks.len() / stack_count);
-        let port = stacks
-            .iter()
-            .enumerate()
-            .rev()
-            .skip(stack_count)
-            // .inspect(|&(i, c)| println!("{i}: {c:?}"))
-            .fold(
-                Port {
-                    stacks: vec![Stack::new(); stack_count],
-                },
-                |mut acc, (i, con)| {
-                    if let Some(container) = con {
-                        acc.stacks[i % stack_count].push(*container);
-                    }
-                    acc
-                },
-            );
+        let port = stacks.iter().enumerate().rev().skip(stack_count).fold(
+            Port {
+                stacks: vec![Stack::new(); stack_count],
+            },
+            |mut acc, (i, con)| {
+                if let Some(container) = con {
+                    acc.stacks[i % stack_count].push(*container);
+                }
+                acc
+            },
+        );
 
         let moves = moves
             .lines()
@@ -125,7 +125,16 @@ impl<'a> Solver<'a> for Day5 {
     }
 
     fn part2(data: Self::Parsed) -> Self::Output {
-        todo!()
+        let (mut port, moves) = data;
+        moves.iter().enumerate().map(|(_, x)| x).for_each(|mov| {
+            mov.execute_9001(&mut port);
+        });
+        let res = port
+            .stacks
+            .iter()
+            .map(|stack| stack.last().unwrap().mark)
+            .collect();
+        res
     }
 }
 
@@ -165,7 +174,7 @@ move 3 from 1 to 3
 move 2 from 2 to 1
 move 1 from 1 to 2"
             )),
-            "".to_string()
+            "MCD".to_string()
         );
     }
 }
