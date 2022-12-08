@@ -39,7 +39,7 @@ fn main() {
     day!(5, "QGTHFZBHV".to_string(), "MGDMPSZTM".to_string());
     day!(6, 1343, 2193);
     day!(7, 1325919, 2050735);
-    day!(8);
+    day!(8, 1703);
 }
 
 fn solve<O, O2, S: for<'a> Solver<'a, Output = O, Output2 = O2>>(
