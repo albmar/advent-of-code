@@ -177,7 +177,37 @@ impl<'a> Solver<'a> for Day7 {
     }
 
     fn part2(data: Self::Parsed) -> Self::Output {
-        todo!()
+        let mut file_system = data
+            .iter()
+            .fold(FileSystem::new(), |mut file_system, token| {
+                match token {
+                    Token::Command(cmd) => {
+                        if let Command::Cd(dir) = cmd {
+                            file_system.change_dir(dir);
+                        }
+                    }
+                    Token::FileInfo(info) => {
+                        if info.dir {
+                            file_system.add_dir(&info.name)
+                        } else {
+                            file_system.add_file(info)
+                        }
+                    }
+                };
+                file_system
+            });
+        file_system.calculate_sizes();
+        let total_available = 70_000_000;
+        let total_needed = 30_000_000;
+        let unused = total_available - file_system.files.get("/").unwrap().size.unwrap();
+        let required = total_needed - unused;
+        file_system
+            .files
+            .values()
+            .filter(|info| info.dir && info.size.unwrap() >= required)
+            .map(|info| info.size.unwrap())
+            .min()
+            .unwrap()
     }
 }
 
@@ -233,6 +263,33 @@ $ ls
 
     #[test]
     fn d7p2() {
-        assert_eq!(Day7::part2(Day7::parse("")), 0);
+        assert_eq!(
+            Day7::part2(Day7::parse(
+                "$ cd /
+$ ls
+dir a
+14848514 b.txt
+8504156 c.dat
+dir d
+$ cd a
+$ ls
+dir e
+29116 f
+2557 g
+62596 h.lst
+$ cd e
+$ ls
+584 i
+$ cd ..
+$ cd ..
+$ cd d
+$ ls
+4060174 j
+8033020 d.log
+5626152 d.ext
+7214296 k"
+            )),
+            24933642
+        );
     }
 }
