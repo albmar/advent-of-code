@@ -85,7 +85,29 @@ impl<'a> Solver<'a> for Day9 {
     }
 
     fn part2(data: Self::Parsed) -> Self::Output {
-        todo!()
+        let mut rope = vec![Vector2::new(0, 0); 10];
+        let mut visited = HashSet::new();
+        visited.insert(rope.last().unwrap().clone());
+        data.iter().for_each(|motion| {
+            (0..motion.amount)
+                .map(|_| Motion {
+                    dir: motion.dir,
+                    amount: 1,
+                })
+                .for_each(|motion| {
+                    rope[0] += Vector2::from(motion);
+                    (0..9).for_each(|i| {
+                        let diff = rope[i] - rope[i + 1];
+                        if diff.dot(&diff) > 2 {
+                            rope[i + 1] += Vector2::new(diff[0].clamp(-1, 1), diff[1].clamp(-1, 1));
+                            if i == 8 {
+                                visited.insert(rope[i + 1].clone());
+                            }
+                        }
+                    });
+                });
+        });
+        visited.len() as u32
     }
 }
 
@@ -112,6 +134,35 @@ R 2"
 
     #[test]
     fn d9p2() {
-        assert_eq!(Day9::part2(Day9::parse("")), 0);
+        assert_eq!(
+            Day9::part2(Day9::parse(
+                "R 4
+U 4
+L 3
+D 1
+R 4
+D 1
+L 5
+R 2"
+            )),
+            1
+        );
+    }
+
+    #[test]
+    fn larger() {
+        assert_eq!(
+            Day9::part2(Day9::parse(
+                "R 5
+U 8
+L 8
+D 3
+R 17
+D 10
+L 25
+U 20"
+            )),
+            36
+        );
     }
 }

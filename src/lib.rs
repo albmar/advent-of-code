@@ -1,5 +1,6 @@
 #![feature(associated_type_defaults)]
 #![feature(array_chunks)]
+#![feature(array_windows)]
 #![feature(iter_array_chunks)]
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 #![allow(
