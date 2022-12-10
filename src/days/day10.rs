@@ -10,7 +10,6 @@ pub struct Command {
 
 #[derive(Debug, Clone, Copy)]
 struct State {
-    cmd: Option<Command>,
     signal: u32,
     pos: u32,
     x: i32,
@@ -19,6 +18,7 @@ struct State {
 impl<'a> Solver<'a> for Day10 {
     type Parsed = Vec<Command>;
     type Output = i32;
+    type Output2 = String;
 
     fn parse(input: &'a str) -> Self::Parsed {
         input
@@ -38,14 +38,12 @@ impl<'a> Solver<'a> for Day10 {
 
     fn part1(data: Self::Parsed) -> Self::Output {
         let mut state = State {
-            cmd: None,
             signal: 20,
             pos: 0,
             x: 1,
         };
         data.iter()
             .fold(vec![], |mut signal_strengths, cmd| {
-                state.cmd = Some(*cmd);
                 let new_pos = state.pos + cmd.cycle;
                 if new_pos >= state.signal {
                     signal_strengths.push(state);
@@ -60,8 +58,27 @@ impl<'a> Solver<'a> for Day10 {
             .sum()
     }
 
-    fn part2(data: Self::Parsed) -> Self::Output {
-        todo!()
+    fn part2(data: Self::Parsed) -> Self::Output2 {
+        let mut state = State {
+            signal: 20,
+            pos: 0,
+            x: 1,
+        };
+        data.iter().fold(String::new(), |mut crt, cmd| {
+            (0..cmd.cycle)
+                .map(|i| i + state.pos)
+                .map(|pos| pos % 40)
+                .map(|x| (x + 1, (x as i32 - state.x).abs() <= 1))
+                .for_each(|(pos, draw)| {
+                    crt.push(if draw { '#' } else { '.' });
+                    if pos % 40 == 0 {
+                        crt.push('\n');
+                    }
+                });
+            state.x += cmd.val;
+            state.pos += cmd.cycle;
+            crt
+        })
     }
 }
 
@@ -226,6 +243,162 @@ noop"
 
     #[test]
     fn d10p2() {
-        assert_eq!(Day10::part2(Day10::parse("")), 0);
+        assert_eq!(
+            Day10::part2(Day10::parse(
+                "addx 15
+addx -11
+addx 6
+addx -3
+addx 5
+addx -1
+addx -8
+addx 13
+addx 4
+noop
+addx -1
+addx 5
+addx -1
+addx 5
+addx -1
+addx 5
+addx -1
+addx 5
+addx -1
+addx -35
+addx 1
+addx 24
+addx -19
+addx 1
+addx 16
+addx -11
+noop
+noop
+addx 21
+addx -15
+noop
+noop
+addx -3
+addx 9
+addx 1
+addx -3
+addx 8
+addx 1
+addx 5
+noop
+noop
+noop
+noop
+noop
+addx -36
+noop
+addx 1
+addx 7
+noop
+noop
+noop
+addx 2
+addx 6
+noop
+noop
+noop
+noop
+noop
+addx 1
+noop
+noop
+addx 7
+addx 1
+noop
+addx -13
+addx 13
+addx 7
+noop
+addx 1
+addx -33
+noop
+noop
+noop
+addx 2
+noop
+noop
+noop
+addx 8
+noop
+addx -1
+addx 2
+addx 1
+noop
+addx 17
+addx -9
+addx 1
+addx 1
+addx -3
+addx 11
+noop
+noop
+addx 1
+noop
+addx 1
+noop
+noop
+addx -13
+addx -19
+addx 1
+addx 3
+addx 26
+addx -30
+addx 12
+addx -1
+addx 3
+addx 1
+noop
+noop
+noop
+addx -9
+addx 18
+addx 1
+addx 2
+noop
+noop
+addx 9
+noop
+noop
+noop
+addx -1
+addx 2
+addx -37
+addx 1
+addx 3
+noop
+addx 15
+addx -21
+addx 22
+addx -6
+addx 1
+noop
+addx 2
+addx 1
+noop
+addx -10
+noop
+noop
+addx 20
+addx 1
+addx 2
+addx 2
+addx -6
+addx -11
+noop
+noop
+noop"
+            )),
+            "##..##..##..##..##..##..##..##..##..##..
+###...###...###...###...###...###...###.
+####....####....####....####....####....
+#####.....#####.....#####.....#####.....
+######......######......######......####
+#######.......#######.......#######.....
+"
+        );
     }
 }
