@@ -67,10 +67,12 @@ impl Ord for State {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Heightmap {
     start: Vector2<i16>,
     end: Vector2<i16>,
+    goal: Option<Rc<dyn Fn(&Heightmap, &State) -> bool>>,
+    valid_height: Option<Rc<dyn Fn(&Heightmap, Vector2<i16>, Vector2<i16>) -> bool>>,
     grid: Grid<Height>,
 }
 
@@ -85,7 +87,8 @@ impl Heightmap {
                 return None;
             }
             let current = frontier.pop().unwrap();
-            if current.pos == self.end {
+            let goal = self.goal.as_ref().unwrap();
+            if goal(self, &current) {
                 return Some(self.solution(current));
             }
             frontier.extend(
@@ -113,11 +116,12 @@ impl Heightmap {
             Vector2::<i16>::new(0, 1),
             Vector2::<i16>::new(1, 0),
         ];
+        let is_valied = self.valid_height.as_ref().unwrap();
         neighbours
             .into_iter()
             .map(move |v| pos + v)
             .filter(move |&new_pos| new_pos >= min && new_pos < max)
-            .filter(move |&new_pos| self.height(new_pos) - self.height(pos) <= 1)
+            .filter(move |&new_pos| is_valied(self, new_pos, pos))
     }
 
     fn height(&self, pos: Vector2<i16>) -> i16 {
@@ -222,11 +226,21 @@ impl<'a> Solver<'a> for Day12 {
             .position(|h| h.is_end())
             .map(|i| Vector2::new(i % grid.cols(), i / grid.cols()).cast())
             .unwrap();
-        Heightmap { start, end, grid }
+        Heightmap {
+            start,
+            end,
+            grid,
+            goal: None,
+            valid_height: None,
+        }
     }
 
     fn part1(mut data: Self::Parsed) -> Self::Output {
         let start = State::new_start(data.start);
+        data.goal = Some(Rc::new(|map, current| current.pos == map.end));
+        data.valid_height = Some(Rc::new(|map, new_pos, pos| {
+            map.height(new_pos) - map.height(pos) <= 1
+        }));
         let path = data.shortest_path(start);
         path.inspect(|path| {
             path.iter().for_each(|state| {
@@ -242,8 +256,27 @@ impl<'a> Solver<'a> for Day12 {
         .unwrap_or_else(|| panic!("No solution found"))
     }
 
-    fn part2(data: Self::Parsed) -> Self::Output {
-        todo!()
+    fn part2(mut data: Self::Parsed) -> Self::Output {
+        let start = State::new_start(data.end);
+        data.goal = Some(Rc::new(|map, current| {
+            map.height(current.pos) == Height('a').value()
+        }));
+        data.valid_height = Some(Rc::new(|map, new_pos, pos| {
+            map.height(pos) - map.height(new_pos) <= 1
+        }));
+        let path = data.shortest_path(start);
+        path.inspect(|path| {
+            path.iter().for_each(|state| {
+                if let Some(cell) = data
+                    .grid
+                    .get_mut(state.pos.y as usize, state.pos.x as usize)
+                {
+                    *cell = cell.0.to_ascii_uppercase().into()
+                }
+            });
+        })
+        .map(|path| path.len() as u32 - 1)
+        .unwrap_or_else(|| panic!("No solution found"))
     }
 }
 
@@ -289,6 +322,15 @@ abdefghi"
 
     #[test]
     fn d12p2() {
-        assert_eq!(Day12::part2(Day12::parse("")), 0);
+        assert_eq!(
+            Day12::part2(Day12::parse(
+                "Sabqponm
+abcryxxl
+accszExk
+acctuvwj
+abdefghi"
+            )),
+            29
+        );
     }
 }
