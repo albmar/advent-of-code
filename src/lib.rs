@@ -2,6 +2,7 @@
 #![feature(array_chunks)]
 #![feature(array_windows)]
 #![feature(iter_array_chunks)]
+#![feature(result_option_inspect)]
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 #![allow(
     clippy::wildcard_imports,
