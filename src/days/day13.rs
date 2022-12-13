@@ -1,7 +1,4 @@
-use std::{
-    cmp::Ordering,
-    fmt::{write, Display},
-};
+use std::{cmp::Ordering, collections::BTreeSet, fmt::Display};
 
 use nom::{
     branch::alt,
@@ -145,14 +142,21 @@ impl<'a> Solver<'a> for Day13 {
             .map(|(i, x)| (i + 1, x))
             .filter(|(_, (left, right))| left < right)
             .collect::<Vec<_>>();
-        right_ordered.iter().for_each(|(i, (left, right))| {
-            println!("== Pair {} ==\n{}\n{}", i, left, right);
-        });
         right_ordered.iter().map(|(i, _)| i).sum()
     }
 
     fn part2(data: Self::Parsed) -> Self::Output {
-        todo!()
+        let mut packets = data
+            .into_iter()
+            .flat_map(|pair| [pair.0, pair.1])
+            .collect::<BTreeSet<_>>();
+        let first = parse_packet("[[2]]").unwrap().1;
+        let second = parse_packet("[[6]]").unwrap().1;
+        packets.insert(first.clone());
+        packets.insert(second.clone());
+        let first = dbg!(packets.iter().position(|x| x == &first)).unwrap() + 1;
+        let second = dbg!(packets.iter().position(|x| x == &second)).unwrap() + 1;
+        first * second
     }
 }
 
@@ -192,23 +196,23 @@ mod tests {
 
     #[test]
     fn ord_int_and_larger_list() {
-        let left = Packet::Int(0);
-        let right = Packet::List(vec![1.into(), 0.into()]);
+        let left = parse_packet("0").unwrap().1;
+        let right = parse_packet("[1,0]").unwrap().1;
         assert_eq!(left.cmp(&right), Ordering::Less);
-        let left = Packet::Int(1);
+        let left = parse_packet("1").unwrap().1;
         assert_eq!(left.cmp(&right), Ordering::Less);
-        let left = Packet::Int(2);
+        let left = parse_packet("[2]").unwrap().1;
         assert_eq!(left.cmp(&right), Ordering::Greater);
     }
 
     #[test]
     fn ord_equal_sized_lists() {
-        let left = Packet::List(vec![0.into()]);
-        let right = Packet::List(vec![1.into()]);
+        let left = parse_packet("[0]").unwrap().1;
+        let right = parse_packet("[1]").unwrap().1;
         assert_eq!(left.cmp(&right), Ordering::Less);
-        let left = Packet::List(vec![1.into()]);
+        let left = parse_packet("[1]").unwrap().1;
         assert_eq!(left.cmp(&right), Ordering::Equal);
-        let left = Packet::List(vec![2.into()]);
+        let left = parse_packet("[2]").unwrap().1;
         assert_eq!(left.cmp(&right), Ordering::Greater);
     }
 
@@ -237,7 +241,6 @@ mod tests {
     fn ord_list_of_lists() {
         let left = parse_packet("[[1],[2,3,4]]").unwrap().1;
         let right = parse_packet("[[1],4]").unwrap().1;
-        println!("{}\n{}", left, right);
         assert_eq!(left.cmp(&right), Ordering::Less);
     }
 
@@ -275,6 +278,33 @@ mod tests {
 
     #[test]
     fn d13p2() {
-        assert_eq!(Day13::part2(Day13::parse("")), 0);
+        assert_eq!(
+            Day13::part2(Day13::parse(
+                "[1,1,3,1,1]
+[1,1,5,1,1]
+
+[[1],[2,3,4]]
+[[1],4]
+
+[9]
+[[8,7,6]]
+
+[[4,4],4,4]
+[[4,4],4,4,4]
+
+[7,7,7,7]
+[7,7,7]
+
+[]
+[3]
+
+[[[]]]
+[[]]
+
+[1,[2,[3,[4,[5,6,7]]]],8,9]
+[1,[2,[3,[4,[5,6,0]]]],8,9]"
+            )),
+            140
+        );
     }
 }
