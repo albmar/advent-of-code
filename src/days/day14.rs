@@ -124,7 +124,73 @@ impl<'a> Solver<'a> for Day14 {
     }
 
     fn part2(data: Self::Parsed) -> Self::Output {
-        todo!()
+        let mut rocks = HashSet::<Vector2<isize>>::new();
+        let mut sand = HashSet::<Vector2<isize>>::new();
+        data.iter()
+            .flat_map(|lines| {
+                lines
+                    .array_windows::<2>()
+                    .map(|[start, end]| {
+                        let min_x = start.x.min(end.x);
+                        let max_x = start.x.max(end.x);
+                        let min_y = start.y.min(end.y);
+                        let max_y = start.y.max(end.y);
+                        [min_x..=max_x, min_y..=max_y]
+                    })
+                    .flat_map(|[x_range, y_range]| {
+                        x_range.flat_map(move |x| y_range.clone().map(move |y| Vector2::new(x, y)))
+                    })
+            })
+            .map(|rock| rock.cast::<isize>())
+            .for_each(|rock| {
+                rocks.insert(rock);
+            });
+        let sand_source = Vector2::new(500, 0);
+        let floor = rocks.iter().map(|v| v.y).max().unwrap() + 2;
+        (0..)
+            .map(|_| sand_source)
+            .map(|mut coord| {
+                loop {
+                    let down = coord + Vector2::new(0, 1);
+                    let left = coord + Vector2::new(-1, 1);
+                    let right = coord + Vector2::new(1, 1);
+                    match (
+                        rocks.get(&down).or(sand.get(&down)).or_else(|| {
+                            if down.y >= floor {
+                                Some(&coord)
+                            } else {
+                                None
+                            }
+                        }),
+                        rocks.get(&left).or(sand.get(&left)).or_else(|| {
+                            if left.y >= floor {
+                                Some(&coord)
+                            } else {
+                                None
+                            }
+                        }),
+                        rocks.get(&right).or(sand.get(&right)).or_else(|| {
+                            if right.y >= floor {
+                                Some(&coord)
+                            } else {
+                                None
+                            }
+                        }),
+                    ) {
+                        (Some(_), Some(_), Some(_)) => {
+                            sand.insert(coord);
+                            break;
+                        }
+                        (None, _, _) => coord = down,
+                        (_, None, _) => coord = left,
+                        (_, _, None) => coord = right,
+                    }
+                }
+                coord
+            })
+            .take_while(|&coord| coord != sand_source)
+            .count()
+            + 1
     }
 }
 
@@ -133,6 +199,32 @@ fn print_grid(grid: &Grid<char>) {
         "{}",
         (0..grid.rows())
             .flat_map(|row| grid.iter_row(row).chain(['\n'].iter()))
+            .collect::<String>()
+    );
+}
+
+fn print_sets(
+    rocks: &HashSet<Vector2<isize>>,
+    sand: &HashSet<Vector2<isize>>,
+    start: &Vector2<isize>,
+) {
+    let (mut min, mut max) = rocks.iter().chain(sand.iter()).chain([start]).fold(
+        (Vector2::repeat(isize::MAX), Vector2::repeat(isize::MIN)),
+        |(min, max), cur| (min.inf(cur), max.sup(cur)),
+    );
+    min -= Vector2::repeat(1);
+    max += Vector2::repeat(1);
+    print!(
+        "{}",
+        (min.y..=max.y)
+            .flat_map(move |y| (min.x..=max.x)
+                .map(move |x| Vector2::new(x, y))
+                .map(|v| rocks
+                    .get(&v)
+                    .and_then(|_| Some('#'))
+                    .or(sand.get(&v).and_then(|_| Some('o')))
+                    .unwrap_or_else(|| if v == *start { '+' } else { '.' }))
+                .chain(['\n']))
             .collect::<String>()
     );
 }
@@ -159,7 +251,7 @@ mod tests {
                 "498,4 -> 498,6 -> 496,6
 503,4 -> 502,4 -> 502,9 -> 494,9"
             )),
-            0
+            93
         );
     }
 }
