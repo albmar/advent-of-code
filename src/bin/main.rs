@@ -57,13 +57,15 @@ fn solve<O, O2, S: for<'a> Solver<'a, Output = O, Output2 = O2>>(
     let trimmed = input.as_str();
 
     let mut args = std::env::args();
-    if args.len() > 1 {
-        let day_as_str = day_number.to_string();
+    let day_as_str = day_number.to_string();
+    if args.len() > 2 {
         if args.any(|x| x == day_as_str || x == "a") {
             bench::<S>(day_number, trimmed);
         }
     } else {
-        run::<S>(day_number, trimmed, part1_output, part2_output);
+        if args.any(|x| x == day_as_str) {
+            run::<S>(day_number, trimmed, part1_output, part2_output);
+        }
     }
 }
 
