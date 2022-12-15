@@ -46,6 +46,7 @@ fn main() {
     day!(12, 504, 500);
     day!(13, 5506, 21756);
     day!(14, 1003, 25771);
+    day!(15);
 }
 
 fn solve<O, O2, S: for<'a> Solver<'a, Output = O, Output2 = O2>>(
