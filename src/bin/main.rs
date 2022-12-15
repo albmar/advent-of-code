@@ -64,7 +64,7 @@ fn solve<O, O2, S: for<'a> Solver<'a, Output = O, Output2 = O2>>(
             bench::<S>(day_number, trimmed);
         }
     } else {
-        if args.any(|x| x == day_as_str) {
+        if args.any(|x| x == day_as_str) || args.len() <= 1 {
             run::<S>(day_number, trimmed, part1_output, part2_output);
         }
     }
