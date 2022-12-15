@@ -65,7 +65,39 @@ impl<'a> Solver<'a> for Day15 {
     }
 
     fn part2(data: Self::Parsed) -> Self::Output {
-        todo!()
+        let sensor_distances = data
+            .iter()
+            .map(|(sensor, beacon)| (sensor, (sensor - beacon).abs().sum()))
+            .collect::<Vec<_>>();
+        let max = if data.first().unwrap().0.x == 2 {
+            20
+        } else {
+            4_000_000
+        };
+        let min = Vector2::repeat(0);
+        let max = Vector2::repeat(max);
+        sensor_distances
+            .iter()
+            .map(|(s, d)| (s, d + 1))
+            .flat_map(|(&&s, d)| {
+                (0..d).flat_map(move |x| {
+                    [
+                        Vector2::new(x, -(d - x)) + s,
+                        Vector2::new(d - x, x) + s,
+                        Vector2::new(-x, d - x) + s,
+                        Vector2::new(-(d - x), x) + s,
+                    ]
+                })
+            })
+            .filter(|&v| v >= min && v <= max)
+            .filter(|v| {
+                sensor_distances
+                    .iter()
+                    .all(|&(s, d)| (v - s).abs().sum() > d)
+            })
+            .last()
+            .map(|v| v.x as usize * 4_000_000 + v.y as usize)
+            .unwrap()
     }
 }
 
@@ -99,6 +131,25 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3
 
     #[test]
     fn d15p2() {
-        assert_eq!(Day15::part2(Day15::parse("")), 0);
+        assert_eq!(
+            Day15::part2(Day15::parse(
+                "Sensor at x=2, y=18: closest beacon is at x=-2, y=15
+Sensor at x=9, y=16: closest beacon is at x=10, y=16
+Sensor at x=13, y=2: closest beacon is at x=15, y=3
+Sensor at x=12, y=14: closest beacon is at x=10, y=16
+Sensor at x=10, y=20: closest beacon is at x=10, y=16
+Sensor at x=14, y=17: closest beacon is at x=10, y=16
+Sensor at x=8, y=7: closest beacon is at x=2, y=10
+Sensor at x=2, y=0: closest beacon is at x=2, y=10
+Sensor at x=0, y=11: closest beacon is at x=2, y=10
+Sensor at x=20, y=14: closest beacon is at x=25, y=17
+Sensor at x=17, y=20: closest beacon is at x=21, y=22
+Sensor at x=16, y=7: closest beacon is at x=15, y=3
+Sensor at x=14, y=3: closest beacon is at x=15, y=3
+Sensor at x=20, y=1: closest beacon is at x=15, y=3
+"
+            )),
+            56000011
+        );
     }
 }
